@@ -62,6 +62,10 @@
             height: 100vh;
             display: flex; align-items: center; justify-content: center;
             text-align: center; color: var(--white); overflow: hidden;
+            /* FALLBACK IMAGE: If video fails, this image shows */
+            background-image: url('https://images.unsplash.com/photo-1516919549054-e08258825f80?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
         }
 
         #heroVideo {
@@ -69,7 +73,7 @@
             top: 50%; left: 50%;
             min-width: 100%; min-height: 100%;
             width: auto; height: auto;
-            z-index: -2;
+            z-index: 0; /* Changed z-index */
             transform: translateX(-50%) translateY(-50%);
             object-fit: cover;
         }
@@ -77,10 +81,10 @@
         .hero-overlay {
             position: absolute; top: 0; left: 0; width: 100%; height: 100%;
             background: linear-gradient(rgba(43, 24, 16, 0.4), rgba(43, 24, 16, 0.8));
-            z-index: -1;
+            z-index: 1; /* Above video */
         }
 
-        .hero-content { z-index: 2; position: relative; padding: 20px; }
+        .hero-content { z-index: 2; position: relative; padding: 20px; } /* Above overlay */
 
         .hero-logo {
             max-width: 500px; width: 80%; margin-bottom: 25px;
@@ -194,10 +198,12 @@
     </nav>
 
     <section id="home" class="hero">
-        <video autoplay muted loop id="heroVideo" playsinline>
+        <video autoplay muted loop playsinline id="heroVideo" poster="https://images.unsplash.com/photo-1516919549054-e08258825f80?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80">
             <source src="https://videos.pexels.com/video-files/2953472/2953472-hd_1920_1080_30fps.mp4" type="video/mp4">
         </video>
+        
         <div class="hero-overlay"></div>
+        
         <div class="hero-content" data-aos="fade-up" data-aos-duration="1500">
             <img src="logo.png" alt="Madras Baking Co." class="hero-logo">
             <h2>GET HIGH ON COCOA</h2>
@@ -274,6 +280,18 @@
     <script>
         AOS.init({ duration: 1000, once: true });
 
+        // =================================================================
+        // SCRIPT TO FORCE VIDEO PLAY
+        // =================================================================
+        window.addEventListener('load', function() {
+            var video = document.getElementById('heroVideo');
+            video.muted = true; 
+            video.play().catch(function(error) {
+                console.log("Video autoplay failed (likely browser policy or battery saver): " + error);
+            });
+        });
+        // =================================================================
+
         // YOUR SETTINGS
         const sheetURL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSuwozY1jgWTePcAk3zX_4gZwhLIbexoCtSntIA__3cJUvIK3z6dUvbzYi1GPLSGlofRqLkebAGJzSz/pub?output=csv"; 
         const bakeryNumber = "919840096734"; 
@@ -302,67 +320,5 @@
             data.forEach(item => {
                 let name = item.Name ? item.Name.trim() : "";
                 
-                // Background Settings
                 if(name === 'AboutImage' && item.ImageURL) {
-                    document.documentElement.style.setProperty('--about-bg', `url('${item.ImageURL}')`);
-                }
-                else if(name === 'OrderImage' && item.ImageURL) {
-                    document.documentElement.style.setProperty('--order-bg', `url('${item.ImageURL}')`);
-                }
-                // Menu Items
-                else if(item.Name && item.Price) {
-                    menuItemsFound = true;
-                    let img = item.ImageURL ? item.ImageURL : 'https://via.placeholder.com/600x400?text=Madras+Baking+Co';
-
-                    htmlContent += `
-                    <div class="menu-item" data-aos="fade-up">
-                        <div class="menu-img" style="background-image: url('${img}');"></div>
-                        <div class="menu-details">
-                            <h3>${item.Name}</h3>
-                            <p>${item.Description}</p>
-                            <span class="price">${item.Price}</span>
-                        </div>
-                    </div>
-                    `;
-
-                    let option = document.createElement("option");
-                    option.text = `${item.Name} - ${item.Price}`;
-                    option.value = item.Name;
-                    select.add(option);
-                }
-            });
-
-            loader.style.display = 'none';
-            if (menuItemsFound) {
-                container.innerHTML = htmlContent;
-            } else {
-                container.innerHTML = "<p style='text-align:center; width:100%;'>No menu items found yet!</p>";
-            }
-        }
-
-        function sendToWhatsapp() {
-            var name = document.getElementById("customerName").value;
-            var phone = document.getElementById("customerPhone").value; // GET PHONE
-            var product = document.getElementById("productSelect").value;
-            var qty = document.getElementById("quantity").value;
-            var address = document.getElementById("address").value;
-
-            if(name === "" || product === "") {
-                alert("Please fill in your name and select a product.");
-                return;
-            }
-
-            var message = "👋 Hi Madras Baking Co! I'd like to place an order:\n\n" +
-                          "👤 *Name:* " + name + "\n" +
-                          "📞 *Phone:* " + phone + "\n" +  // ADD PHONE TO MESSAGE
-                          "🍪 *Order:* " + qty + " x " + product + "\n" +
-                          "📍 *Delivery To:* " + address + "\n\n" + 
-                          "Please confirm total amount and payment details.";
-
-            var whatsappUrl = "https://wa.me/" + bakeryNumber + "?text=" + encodeURIComponent(message);
-            window.open(whatsappUrl, '_blank').focus();
-        }
-    </script>
-
-</body>
-</html>
+                    document.documentElement.style.setProperty('--about-bg', `url('${
