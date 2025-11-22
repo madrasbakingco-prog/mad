@@ -321,4 +321,64 @@
                 let name = item.Name ? item.Name.trim() : "";
                 
                 if(name === 'AboutImage' && item.ImageURL) {
-                    document.documentElement.style.setProperty('--about-bg', `url('${
+                    document.documentElement.style.setProperty('--about-bg', `url('${item.ImageURL}')`);
+                }
+                else if(name === 'OrderImage' && item.ImageURL) {
+                    document.documentElement.style.setProperty('--order-bg', `url('${item.ImageURL}')`);
+                }
+                else if(item.Name && item.Price) {
+                    menuItemsFound = true;
+                    let img = item.ImageURL ? item.ImageURL : 'https://via.placeholder.com/600x400?text=Madras+Baking+Co';
+
+                    htmlContent += `
+                    <div class="menu-item" data-aos="fade-up">
+                        <div class="menu-img" style="background-image: url('${img}');"></div>
+                        <div class="menu-details">
+                            <h3>${item.Name}</h3>
+                            <p>${item.Description}</p>
+                            <span class="price">${item.Price}</span>
+                        </div>
+                    </div>
+                    `;
+
+                    let option = document.createElement("option");
+                    option.text = `${item.Name} - ${item.Price}`;
+                    option.value = item.Name;
+                    select.add(option);
+                }
+            });
+
+            loader.style.display = 'none';
+            if (menuItemsFound) {
+                container.innerHTML = htmlContent;
+            } else {
+                container.innerHTML = "<p style='text-align:center; width:100%;'>No menu items found yet!</p>";
+            }
+        }
+
+        function sendToWhatsapp() {
+            var name = document.getElementById("customerName").value;
+            var phone = document.getElementById("customerPhone").value; 
+            var product = document.getElementById("productSelect").value;
+            var qty = document.getElementById("quantity").value;
+            var address = document.getElementById("address").value;
+
+            if(name === "" || product === "") {
+                alert("Please fill in your name and select a product.");
+                return;
+            }
+
+            var message = "👋 Hi Madras Baking Co! I'd like to place an order:\n\n" +
+                          "👤 *Name:* " + name + "\n" +
+                          "📞 *Phone:* " + phone + "\n" + 
+                          "🍪 *Order:* " + qty + " x " + product + "\n" +
+                          "📍 *Delivery To:* " + address + "\n\n" + 
+                          "Please confirm total amount and payment details.";
+
+            var whatsappUrl = "https://wa.me/" + bakeryNumber + "?text=" + encodeURIComponent(message);
+            window.open(whatsappUrl, '_blank').focus();
+        }
+    </script>
+
+</body>
+</html>
